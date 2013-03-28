@@ -1,4 +1,4 @@
-package Ringgz.protocol;
+package game.models.network;
 
 /**
  * <p>
@@ -23,7 +23,8 @@ package Ringgz.protocol;
  * </p>
  * 
  * @author Jolien Lankheet
- * @version Concept
+ * @author Mart Oude Weernink
+ * @version 20130328
  */
 public interface ClientHandlerProtocol {
 
@@ -32,10 +33,9 @@ public interface ClientHandlerProtocol {
 	 */
 	public static final char DELIM = ClientProtocol.DELIM;
 
-	// standaardcommando's
+	// Standaardcommando's
 	/**
 	 * Geeft aan de client door dat hij nu in de game zit.
-	 * 
 	 * @require Een client heeft het <tt>join</tt>-commando gebruikt.
 	 * @syntax <code>accept</code>
 	 */
@@ -44,25 +44,39 @@ public interface ClientHandlerProtocol {
 	/**
 	 * Geeft aan de client de spelernamen door van de partij waar hij in zit en
 	 * waar de startsteen ligt.
-	 * 
-	 * @param name
-	 *            Spelernaam
-	 * @param startingBase
-	 *            positie Startsteen
+	 * @param name            Spelernaam
+	 * @param startingBase    positie Startsteen
 	 * @require Alle spelers waarvan de namen worden doorgegeven bevinden zich
 	 *          in de pre-game lobby en zijn dus niet met een partij bezig.
-	 * @require <tt> 0<=startingBase<25 </tt>
+	 * @require <tt> 6<=startingBase<=8 || 11<=startingBase<=13 || 16<=startingBase<=18 </tt>
 	 * @ensure Het <tt>nextMove</tt>-commando wordt hierna doorgegeven.
+	 * @ensure Kleurverdeling 
+	 * 		   bij 2 spelers: Spelernaam 0: color 0 en 1
+	 * 				  		  Spelernaam 1: color 2 en 3
+	 * 		   bij 3 spelers: Spelernaam 0: color 0 en 3
+	 * 				  		  Spelernaam 1: color 1 en 3
+	 * 				  		  Spelernaam 2: color 2 en 3
+	 * 		   bij 4 spelers: Spelernaam i: color i
 	 * @syntax <code>startGame &lt;Int:startingBase&gt; &lt;String:name&gt;(2..4)</code>
 	 */
 	public static final String START_GAME = "startGame";
 
 	/**
+	 * Geeft aan de client door dat de volgende speler aan de beurt is waarbij
+	 * de naam van die speler wordt vermeld.
+	 * @param name     Naam van de speler die aan de beurt is
+	 * @require Er zijn geen spelers die de verbindig hebben verbroken.
+	 * @require Speler die aan de beurt is kan nog een zet doen.
+	 * @require Het <tt>setMove</tt>-commando is verzonden || Het <tt>startGame</tt>-commando is verzonden.
+	 * @syntax <code>nextMove &lt;String:name&gt; </code>
+	 */
+	public static final String NEXT_MOVE = "nextMove";
+	
+	/**
 	 * Geeft aan de client door dat er een zet is gedaan en specificeert deze.
 	 * Als de server een zet heeft goedgekeurd wordt dit commando verstuurd naar
 	 * alle clients van de betreffende partij, inclusief de client die de zet
 	 * deed.
-	 * 
 	 * @param field
 	 *            Nummer van het vakje waar de ring geplaatst is, beginnend
 	 *            linksboven met 0 en oplopend langs de leesrichting
@@ -85,31 +99,15 @@ public interface ClientHandlerProtocol {
 	public static final String SET_MOVE = "setMove";
 
 	/**
-	 * Geeft aan de client door dat de volgende speler aan de beurt is waarbij
-	 * de naam van die speler wordt vermeld en eventueel de kleur.
-	 * 
-	 * @param name
-	 *            Naam van de speler die aan de beurt is
-	 * @require Er zijn geen spelers die de verbindig hebben verbroken.
-	 * @require Speler die aan de beur is kan nog een zet doen.
-	 * @require Het <tt>setMove</tt>-commando is verzonden.
-	 * @syntax <code>nextMove &lt;String:name&gt; &lt;Int:color&gt</code>
-	 */
-	public static final String NEXT_MOVE = "nextMove";
-
-	/**
 	 * Geeft aan de client door dat het spel over is en wie de winnaars zijn
 	 * door de spelers en het bijbehorende aantal punten op volgorde te zetten.
-	 * 
-	 * @param resultList
-	 *            Lijst met resultaat van spelletje
-	 * @syntax <code>gameOver &lt;List:resultList&gt;(0..4)</code>
+	 * @param resultList          Lijst met resultaat van spelletje
+	 * @syntax <code>gameOver (&lt;String:name&gt;&lt;Int:points&gt;)(0..4)</code>
 	 */
 	public static final String GAME_OVER = "gameOver";
 
 	/**
 	 * Geeft een fout door aan de client.
-	 * 
 	 * @param code
 	 *            Een foutcode die de fout beschrijft. Gebruik de methode
 	 *            <tt>value()</tt> op een <tt>Error</tt>-instantie om de code te
@@ -127,24 +125,19 @@ public interface ClientHandlerProtocol {
 	 */
 	public static final String ERROR = "error";
 
-	// chatcommando
+	// Chatcommando
 	/**
 	 * Geeft een chatbericht door aan de client, met de naam van de afzender.
-	 * 
-	 * @param name
-	 *            Naam van de afzender
-	 * @param message
-	 *            Bericht
+	 * @param name         Naam van de afzender
+	 * @param message      Bericht
 	 * @syntax <code>chat &lt;String:name&gt; &lt;String:message&gt;</code>
 	 */
 	public static final String BROADCAST = "broadcast";
 
-	// challenge-commando's
+	// Challenge-commando's
 	/**
 	 * Geeft een lijst van namen van alle spelers.
-	 * 
-	 * @param name
-	 *            Spelernaam
+	 * @param name         Spelernaam
 	 * @ensure Wanneer een speler geen lobby heeft wordt dit afgevangen met het
 	 *         het <tt>error</tt>-commando.
 	 * @syntax <code>players &lt;String:name&gt;*</code>
@@ -153,9 +146,7 @@ public interface ClientHandlerProtocol {
 
 	/**
 	 * Geeft aan de client door dat hij uitgenodigd is door de gegeven speler.
-	 * 
-	 * @param name
-	 *            Naam van de uitnodiger
+	 * @param name         Naam van de uitnodiger
 	 * @syntax <code>challengedBy &lt;String:name&gt;</code>
 	 */
 	public static final String CHALLENGED_BY = "challengedBy";
@@ -163,9 +154,7 @@ public interface ClientHandlerProtocol {
 	/**
 	 * Geeft aan de client door dat zijn uitnodiging door de gegeven speler of
 	 * spelers is afgewezen en dat de partij niet doorgaat.
-	 * 
-	 * @param name
-	 *            Naam van de genodigde
+	 * @param name         Naam van de genodigde
 	 * @syntax <code>challengeRejected &lt;String:name&gt;</code>
 	 */
 	public static final String CHALLENGE_REJECTED = "challengeRejected";

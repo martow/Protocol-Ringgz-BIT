@@ -1,8 +1,8 @@
-package Ringgz.protocol;
+package game.models.network;
 
 /**
  * <p>
- * Het protocol waarmee de client met de server (client handler) communiceert.
+ * Het protocol waarmee de client met de server (ClientHandler) communiceert.
  * Bij het implementeren moet in ieder geval een invulling gegeven worden aan de
  * standaardcommando's. Als de client hierdoor niet aan een verzoek van een
  * server kan voldoen, moet de betreffende foutmelding worden doorgegeven met
@@ -27,7 +27,8 @@ package Ringgz.protocol;
  * </p>
  * 
  * @author Jolien Lankheet
- * @version Concept
+ * @author Mart Oude Weernink
+ * @version 20130328
  */
 public interface ClientProtocol {
 
@@ -36,17 +37,15 @@ public interface ClientProtocol {
 	 */
 	public static final char DELIM = '~';
 
-	// standaardcommando's
+	// Standaardcommando's
 	/**
 	 * Meldt zich aan bij de server en geeft zijn spelernaam door aan de server.
-	 * Geeft ook het aantal tegenstanders mee, maximaal 3. Als 0 ingegeven
+	 * Geeft ook het aantal gewenste tegenstanders mee, maximaal 3. Als 0 ingegeven
 	 * wordt, wordt een random aantal tegenspelers gekozen.
-	 * 
-	 * @param name
-	 *            Spelernaam
-	 * @param players
-	 *            Gewenste aantal tegenspelers
+	 * @param name         Spelernaam
+	 * @param players      Gewenste aantal tegenspelers
 	 * @require <tt>name != "" </tt>
+	 * @require !name.contains(DELIM)
 	 * @require <tt>0<=players<4 </tt>
 	 * @syntax <code>join &lt;String:name&gt; &lt;Int:players&gt;</code>
 	 */
@@ -56,11 +55,9 @@ public interface ClientProtocol {
 	 * Verzoekt de server om een zet te doen. Een zet bestaat uit het plaatsen
 	 * van een ring. De client krijgt zijn eigen zet terug van de server, mits
 	 * deze is goedgekeurd.
-	 * 
 	 * @param field
 	 *            Nummer van het vakje waarin de ring geplaatst moet worden,
 	 *            beginnend linksboven met 0 en oplopend langs de leesrichting
-	 * 
 	 * @param color
 	 *            Kleur die de ring moet hebben. Lopend van 0 t/m 3.
 	 * @param format
@@ -80,9 +77,7 @@ public interface ClientProtocol {
 	public static final String DO_MOVE = "doMove";
 
 	/**
-	 * Geeft een fout door aan de server. Bedoeld om aan te geven dat de chat-
-	 * of challenge-functie niet beschikbaar is of om te debuggen.
-	 * 
+	 * Geeft een fout door aan de server.
 	 * @param code
 	 *            Een foutcode die de fout beschrijft. Gebruik de methode
 	 *            <tt>value()</tt> op een <tt>Error</tt>-instantie om de code te
@@ -90,11 +85,9 @@ public interface ClientProtocol {
 	 * @param description
 	 *            Een beschrijving van de fout. Voor een standaardbeschrijving
 	 *            kan <tt>toString()</tt> van een <tt>Error</tt>-instantie
-	 *            gebruikt worden. De server is vrij om te kiezen tussen de
+	 *            gebruikt worden. De client is vrij om te kiezen tussen de
 	 *            standaardbeschrijving of de meegegeven beschrijving.
-	 * @require <tt>(code == Error.CHALLENGE_NOT_SUPPORTED.value()) ||<br>
-	 * (code == Error.CHAT_NOT_SUPPORTED.value()) ||<br>
-	 * (code == Error.DEFAULT.value())</tt>
+	 * @require <tt>(code == Error.DEFAULT.value())</tt>
 	 * @require <tt>description != ""</tt>
 	 * @require <tt>for 0 <= i < description.length():<br>
 	 * &nbsp;&nbsp;name.charAt(i) != DELIM</tt>
@@ -102,30 +95,26 @@ public interface ClientProtocol {
 	 */
 	public static final String ERROR = "error";
 
-	// chatcommando
+	// Chatcommando
 	/**
 	 * Geeft een chatbericht door aan de server.
-	 * 
-	 * @param message
-	 *            Bericht
+	 * @param message          Bericht
 	 * @syntax <code>sendMessage &lt;String:message&gt;</code>
 	 */
 	public static final String SEND_MESSAGE = "sendMessage";
 
-	// challenge-commando's
+	// Challenge-commando's
 	/**
 	 * Verzoekt de server om een lijst van spelers die in het spel zitten.
-	 * 
 	 * @require Deze client bevindt zich in de lobby.
 	 * @syntax <code>getPlayers</code>
 	 */
 	public static final String GET_PLAYERS = "getPlayers";
 
 	/**
-	 * Verzoekt de server om één of meerdere spelers uit te nodigen voor een
+	 * Verzoekt de server om ŽŽn of meerdere spelers uit te nodigen voor een
 	 * potje.
-	 * 
-	 * @param names
+	 * @param name
 	 *            Namen van de gewenste tegenstanders
 	 * @require <tt>name != ""</tt>
 	 * @require De gegeven namen zijn bekend bij de server.
@@ -136,7 +125,6 @@ public interface ClientProtocol {
 	/**
 	 * Accepteert een uitnodiging. De partij kan ook door iemand anders
 	 * geannuleerd worden.
-	 * 
 	 * @param name
 	 *            Naam van de uitnodiger
 	 * @require <tt>naam</tt> heeft deze client uitgenodigd.
@@ -148,7 +136,6 @@ public interface ClientProtocol {
 
 	/**
 	 * Wijst een uitnodiging af. De server zal de partij nu annuleren.
-	 * 
 	 * @param name
 	 *            Naam van de uitnodiger
 	 * @require <tt>naam</tt> heeft deze client uitgenodigd.

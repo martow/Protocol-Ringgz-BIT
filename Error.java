@@ -1,4 +1,4 @@
-package Ringgz.protocol;
+package game.models.network;
 
 /**
  * <p>
@@ -27,13 +27,21 @@ package Ringgz.protocol;
  * </p>
  * 
  * @author Jolien Lankheet
- * @version Concept
+ * @author Mart Oude Weernink
+ * @version 20130328
  */
 public enum Error {
-	INVALID_MOVE(1, "Ongeldige zet"), INVALID_NAME(2, "Ongeldige naam"), INVALID_PLAYERS(
-			3, "Ongeldig aantal spelers"), PLAYER_LEFT(4, "Speler is weggegaan"), UNKNOWN_COMMAND(
-			5, "Onbekend commando"), GAME_OVER(6, "Je kan geen zet meer doen"), DEFAULT(7,
-			"Error");
+	INVALID_MOVE(1, "Ongeldige zet"),
+	INVALID_NAME(2, "Ongeldige naam"),
+	INVALID_PLAYERS(3, "Ongeldig aantal spelers"),
+	PLAYER_LEFT(4, "Speler is weggegaan"),
+	UNKNOWN_COMMAND(5, "Onbekend commando"),
+	GAME_OVER(6, "Je kan geen zet meer doen"),
+	DEFAULT(7,"Error"),
+	
+	// Extra
+	CHALLENGE_NOT_SUPPORTED(8, "Challenge-functie wordt niet ondersteund"),
+	CHAT_NOT_SUPPORTED(9, "Chat-functie wordt niet ondersteund");
 
 	/**
 	 * Beschrijving van de foutmelding
@@ -43,11 +51,8 @@ public enum Error {
 
 	/**
 	 * Interne constructor voor het initialiseren van de enum-objecten.
-	 * 
-	 * @param description
-	 *            Beschrijving van de foutmelding
-	 * @param code
-	 *            foutcode van foutmelding
+	 * @param description: Beschrijving van de foutmelding
+	 * @param code: foutcode van foutmelding
 	 */
 	private Error(int code, String description) {
 		this.description = description;
@@ -56,7 +61,6 @@ public enum Error {
 
 	/**
 	 * Geeft de error code van de foutmelding.
-	 * 
 	 * @return Een integer-waarde die uniek is voor elk type <tt>Error</tt>
 	 */
 	public int value() {
@@ -65,7 +69,6 @@ public enum Error {
 
 	/**
 	 * Geeft een beschrijving van de foutmelding
-	 * 
 	 * @return De beschrijving van de foutmelding
 	 */
 	public String toString() {
